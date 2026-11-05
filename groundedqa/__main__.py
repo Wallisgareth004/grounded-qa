@@ -16,14 +16,13 @@ def main(argv: list[str]) -> int:
         print('usage: python -m groundedqa ask <file> "<question>"', file=sys.stderr)
         return 2
     path, question = argv[1], argv[2]
+    store = Store()
     try:
         with open(path, "rb") as fh:
-            doc = Store().add(fh.read(), path)
+            doc = store.add(fh.read(), path)
     except (OSError, RefusedDocument) as exc:
         print(json.dumps({"refused": True, "why": str(exc)}))
         return 1
-    store = Store()
-    store.docs[doc.id] = doc
     print(json.dumps(store.ask(doc.id, question).to_dict(), indent=2, ensure_ascii=False))
     return 0
 

@@ -4,7 +4,7 @@
 """chunk.py and retrieve.py."""
 
 from groundedqa.chunk import chunk_page, chunk_pages
-from groundedqa.retrieve import BM25, tokens
+from groundedqa.retrieve import BM25, stem, tokens
 
 
 def test_chunking_is_deterministic_and_keeps_page_and_offset(handbook):
@@ -14,8 +14,22 @@ def test_chunking_is_deterministic_and_keeps_page_and_offset(handbook):
     assert [c.id for c in a] == [c.id for c in b]
     assert all(c.page == 1 for c in a)
     for c in a:
-        assert text[c.offset:c.offset + len(c.text)].strip().startswith(c.text[:20])
+        assert text[c.offset:].startswith(c.text)
     assert len(a) >= 30  # one chunk per section at least
+
+
+def test_offsets_are_exact_even_when_a_blank_line_tips_the_size():
+    text = "a" * 20 + "\n\n" + "b" * 20 + "\n\n" + "ccccc"
+    for c in chunk_page(text, 1, size=20):
+        assert text[c.offset:].startswith(c.text), c
+
+
+def test_a_heading_without_a_blank_line_before_it_still_starts_a_chunk_and_a_long_paragraph_is_one_chunk():
+    text = "Intro line.\n## Section 1: A\nFirst body.\n## Section 2: B\nSecond body.\n"
+    chunks = chunk_page(text, 1, size=10_000)
+    assert [c.text.splitlines()[0] for c in chunks] == ["Intro line.", "## Section 1: A", "## Section 2: B"]
+    long = "word " * 500
+    assert len(chunk_page(long, 1, size=100)) == 1
 
 
 def test_a_heading_starts_a_new_chunk_so_sections_never_straddle():
@@ -33,9 +47,12 @@ def test_long_pages_split_by_size_and_multiple_pages_number_from_one():
     assert chunks[-1].page == 2 and chunks[-1].id == "p2-c1"
 
 
-def test_tokens_drop_stopwords_lowercase_and_trim_common_endings():
-    assert tokens("What is the Rule for LOST gear?") == ["rule", "lost", "gear"]
-    assert tokens("runs refuelled donated bodies glass") == ["run", "refuell", "donat", "body", "glass"]
+def test_tokens_drop_stopwords_lowercase_and_stem_the_same_on_both_sides():
+    assert tokens("What is the Rule for LOST gear?") == ["rul", "lost", "gear"]
+    for a, b in (("runs", "run"), ("refuelled", "refuel"), ("donated", "donate"), ("dives", "dive"),
+                 ("bodies", "body"), ("cancelled", "cancel"), ("rinsed", "rinse"), ("pages", "page")):
+        assert stem(a) == stem(b), (a, b)
+    assert stem("glass") == "glass" and stem("morning") == "morn"  # crude, but the same on both sides
     assert tokens("who runs the compressor?") == ["run", "compressor"]
 
 

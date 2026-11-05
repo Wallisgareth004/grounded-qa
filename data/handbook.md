@@ -1,8 +1,8 @@
-# Harbour Dive Centre: staff handbook (made up, for this repo)
+# Grey Seal Dive Centre, Nowhere Bay: staff handbook (made up, for this repo)
 
 ## Section 1: Welcome aboard
 
-This handbook is for everyone who works at Harbour Dive Centre, from the boat crew to the front desk. Read it in your first week and keep it where you can find it. If a rule here and a spoken instruction disagree, the handbook wins until the manager updates it in writing.
+This handbook is for everyone who works at Grey Seal Dive Centre, Nowhere Bay, from the boat crew to the front desk. Read it in your first week and keep it where you can find it. If a rule here and a spoken instruction disagree, the handbook wins until the manager updates it in writing.
 
 ## Section 2: Opening the shop
 

@@ -19,23 +19,34 @@ STOPWORDS = set(
 )
 
 
-# In plain words: a light stemmer so "runs" meets "run" and "donated" meets "donate":
-# common English endings are trimmed from longer words. Crude by design and the same on
-# both the question and the passages, which is all that matters for matching.
+# In plain words: a crude stemmer, the same on the question and the passages, which is
+# all that matters for matching: "runs" meets "run", "donated" meets "donate", "dives"
+# meets "dive", "refuelled" meets "refuel". It trims common endings, undoes a doubled
+# consonant ("cancell" -> "cancel") and drops a trailing e from every word so "dive" and
+# "dives" land on the same stem. It is not English: "morning" becomes "morn" on both sides.
 def stem(word: str) -> str:
     if len(word) <= 3:
         return word
-    for ending in ("ing", "ies", "ed", "es", "s"):
-        if word.endswith(ending) and not word.endswith("ss"):
-            base = word[: -len(ending)]
+    base, trimmed = word, ""
+    for ending in ("ies", "ing", "ed", "es", "s"):
+        if base.endswith(ending) and not base.endswith("ss"):
+            cut = base[: -len(ending)]
             if ending == "ies":
-                base += "y"
-            return base if len(base) >= 3 else word
-    return word
+                cut += "y"
+            if len(cut) >= 3:
+                base, trimmed = cut, ending
+            break
+    if trimmed in ("ed", "ing") and len(base) >= 4 and base[-1] == base[-2] and base[-1] not in "aeiou":
+        base = base[:-1]  # cancell -> cancel, refuell -> refuel (only after an ending came off)
+    if len(base) >= 4 and base.endswith("e"):
+        base = base[:-1]  # dive/dives -> div; donate/donated -> donat
+    return base
 
 
+# In plain words: words, lowercased, stopwords and single letters (the "s" of "manager's")
+# dropped, then stemmed.
 def tokens(text: str) -> list[str]:
-    return [stem(t) for t in TOKEN.findall(text.lower()) if t not in STOPWORDS]
+    return [stem(t) for t in TOKEN.findall(text.lower()) if t not in STOPWORDS and len(t) > 1]
 
 
 class Retriever(Protocol):

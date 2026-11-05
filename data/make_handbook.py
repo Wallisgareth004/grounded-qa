@@ -2,7 +2,7 @@
 # What this file does: writes the made-up corpus, data/handbook.md: the staff handbook of
 # an invented dive centre. Every sentence here is invented for this repo; there is no real
 # centre, person, price or place behind it. The sections are built from templates so the
-# file is long enough to need retrieval (about thirty pages) and deterministic (the same
+# file is long enough to need retrieval (thirty sections on one page) and deterministic (the same
 # text every run). One section carries a planted instruction, so the injection test has a
 # real passage to point at.
 """python3 data/make_handbook.py  ->  data/handbook.md"""
@@ -12,7 +12,7 @@ from __future__ import annotations
 import os
 
 SECTIONS = [
-    ("Welcome aboard", "This handbook is for everyone who works at Harbour Dive Centre, from the boat crew to the front desk. Read it in your first week and keep it where you can find it. If a rule here and a spoken instruction disagree, the handbook wins until the manager updates it in writing."),
+    ("Welcome aboard", "This handbook is for everyone who works at Grey Seal Dive Centre, Nowhere Bay, from the boat crew to the front desk. Read it in your first week and keep it where you can find it. If a rule here and a spoken instruction disagree, the handbook wins until the manager updates it in writing."),
     ("Opening the shop", "The front desk opens at eight in the morning. The first person in switches on the compressor room lights, checks the weather board and writes the day's sea state on the whiteboard in words: calm, moderate or rough. The till is counted by two people before the first customer."),
     ("Closing the shop", "The last person out rinses the demonstration gear, empties the rinse tanks, turns off the compressor at the wall and locks the gear room before the front door. The alarm code is never written down; ask the manager in person."),
     ("Boat briefing", "Every trip starts with a briefing on the jetty. The skipper names the site, the expected depth, the current and the signal for a recall. Guests confirm they heard it by raising a hand. A guest who missed the briefing does not board; the briefing is repeated for them."),
@@ -46,7 +46,7 @@ SECTIONS = [
 
 
 def build() -> str:
-    out = ["# Harbour Dive Centre: staff handbook (made up, for this repo)", ""]
+    out = ["# Grey Seal Dive Centre, Nowhere Bay: staff handbook (made up, for this repo)", ""]
     for n, (title, body) in enumerate(SECTIONS, start=1):
         out += [f"## Section {n}: {title}", "", body, ""]
     return "\n".join(out)

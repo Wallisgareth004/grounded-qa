@@ -1,7 +1,8 @@
 # What this file does: cuts a document into passages ("chunks") the retriever can score,
 # and remembers where each one came from (page and character offset) so an answer can
-# point back at it. Deterministic: the same text always gives the same chunks. A heading
-# line in markdown starts a new chunk, so a passage never straddles two sections.
+# point back at it. Deterministic: the same text always gives the same chunks. Passages
+# are cut at paragraph breaks and before markdown headings, so a passage never holds two
+# sections; one paragraph is never cut in the middle, however long it is.
 """chunk.py: text -> list of Chunk."""
 
 from __future__ import annotations
@@ -21,17 +22,20 @@ class Chunk:
 
 
 # In plain words: splits one page's text into chunks of about `size` characters, cutting
-# at paragraph breaks or headings, never in the middle of a sentence when it can help it.
+# only at paragraph breaks and before headings; a single paragraph longer than `size` stays
+# one chunk. The offset points at the chunk's first visible character.
 def chunk_page(text: str, page: int, size: int = 600) -> list[Chunk]:
     chunks: list[Chunk] = []
     buf, buf_start, pos = [], 0, 0
-    paragraphs = re.split(r"(\n\s*\n)", text)
+    paragraphs = re.split(r"(\n\s*\n|\n(?=#{1,6}\s))", text)
 
     def flush() -> None:
         nonlocal buf, buf_start
-        body = "".join(buf).strip()
+        raw = "".join(buf)
+        body = raw.strip()
         if body:
-            chunks.append(Chunk(f"p{page}-c{len(chunks) + 1}", page, buf_start, body))
+            start = buf_start + (len(raw) - len(raw.lstrip()))
+            chunks.append(Chunk(f"p{page}-c{len(chunks) + 1}", page, start, body))
         buf, buf_start = [], pos
 
     for part in paragraphs:

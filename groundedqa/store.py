@@ -1,6 +1,6 @@
 # What this file does: holds the documents a session has uploaded, in memory, each with
-# its chunks and its own retriever. Nothing is written to disk; restarting the server
-# forgets everything, which is what a prototype on someone else's data should do.
+# its chunks and its own retriever. The store itself writes nothing to disk; restarting
+# the server forgets everything, which is what a prototype on someone else's data should do.
 """store.py: Document and Store."""
 
 from __future__ import annotations

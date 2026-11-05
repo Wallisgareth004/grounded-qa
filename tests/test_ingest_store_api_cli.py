@@ -75,6 +75,17 @@ def test_the_api_round_trip_upload_ask_receipts(handbook):
     assert r.json()["refused"] and r.json()["answer"] == "not in the document"
 
 
+def test_the_api_refuses_an_oversized_upload_before_reading_it_and_clamps_k(handbook):
+    from groundedqa.ingest import MAX_BYTES
+    client = TestClient(app)
+    r = client.post("/documents", files={"file": ("big.txt", b"a" * (MAX_BYTES + 1), "text/plain")})
+    assert r.status_code == 422 and "five megabytes" in r.json()["detail"]
+    r = client.post("/documents", files={"file": ("handbook.md", handbook, "text/markdown")})
+    doc_id = r.json()["id"]
+    r = client.post(f"/documents/{doc_id}/ask", json={"question": "where is the emergency oxygen kit kept?", "k": 999})
+    assert r.status_code == 200 and len(r.json()["receipts"]) <= 10
+
+
 def test_the_api_refuses_bad_documents_and_unknown_ids():
     client = TestClient(app)
     r = client.post("/documents", files={"file": ("scan.pdf", make_scanned_pdf(), "application/pdf")})
@@ -101,4 +112,4 @@ def test_the_corpus_is_made_up_and_names_nobody(handbook):
     text = handbook.decode()
     assert "made up" in text.lower()
     assert "@" not in text and "+27" not in text and "/Users/" not in text
-    assert "Harbour Dive Centre" in text
+    assert "Grey Seal Dive Centre, Nowhere Bay" in text  # an obviously invented name and place
