@@ -1,5 +1,7 @@
 # grounded-qa
 
+[![tests](https://github.com/Wallisgareth004/grounded-qa/actions/workflows/tests.yml/badge.svg)](https://github.com/Wallisgareth004/grounded-qa/actions/workflows/tests.yml)
+
 A document Q&A prototype that shows its receipts: every answer carries the passages it came from, and a question the document can't answer gets "not in the document" instead of a guess.
 
 **Who it's for:** anyone who wants a small, honest retrieval-augmented Q&A over one document (a handbook, a contract, a manual) and wants to see *why* each answer was given.
