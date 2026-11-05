@@ -28,7 +28,7 @@ What an answer looks like (the CLI, shortened):
 {"question": "what happens to lost gear after thirty days?",
  "answer": "After thirty days unclaimed items are donated.",
  "refused": false, "flagged": false,
- "receipts": [{"id": "p1-c11", "page": 1, "offset": 3412, "text": "## Section 10: Lost gear\n\nGear left behind goes into the lost basket…", "quoted_instruction": false}],
+ "receipts": [{"id": "p1-c11", "page": 1, "offset": 2664, "text": "## Section 10: Lost gear\n\nGear left behind goes into the lost basket…", "quoted_instruction": false}],
  "why": "the sentence in the best passage that shares the most words with the question"}
 ```
 
@@ -48,6 +48,6 @@ No embeddings or vector store shipped (the interface is there); no reranking; no
 `tests/test_chunk_and_retrieve.py` (chunking is deterministic and keeps page and offset; a known question finds its known passage), `tests/test_answer.py` (receipts exist and contain the answer; off-document questions are refused; the planted instruction is quoted, flagged and never followed; the model path's prompt), `tests/test_ingest_store_api_cli.py` (a hand-written two-page PDF, a scanned PDF refused, empty/binary/oversized refused, the API round trip, the CLI).
 
 ## Security notes
-Nothing is fetched. No key is read. The store is memory only. The packages this code imports directly (FastAPI, Starlette, pydantic, uvicorn, python-multipart, pypdf) are pinned in `requirements.txt`; their own dependencies are not pinned.
+Nothing is fetched. No key is read. The store is memory only. The packages this code imports directly (FastAPI, pydantic, pypdf) and the ones it runs or needs at runtime (Starlette, uvicorn, python-multipart) are pinned in `requirements.txt`; their own dependencies are not pinned.
 
 MIT licence.
