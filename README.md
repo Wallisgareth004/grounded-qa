@@ -36,6 +36,42 @@ What an answer looks like (the CLI, shortened):
 
 And a refusal: `{"answer": "not in the document", "refused": true, "why": "the best passage shares too little with the question (fewer than half its words)", "receipts": [...]}`.
 
+## In 60 seconds
+
+```sh
+git clone https://github.com/Wallisgareth004/grounded-qa && cd grounded-qa
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m groundedqa ask data/handbook.md "what happens to lost gear after thirty days?"
+```
+```
+{
+  "question": "what happens to lost gear after thirty days?",
+  "answer": "After thirty days unclaimed items are donated.",
+  "refused": false,
+  "receipts": [
+    {
+      "id": "p1-c11",
+      "page": 1,
+      "offset": 2664,
+      "text": "## Section 10: Lost gear\n\nGear left behind goes into the lost basket with the date and the trip written on a tag. After thirty days unclaimed items are donated. Staff never keep lost gear, even old fins.",
+      "quoted_instruction": false
+    },
+```
+(The first receipt of the real output, captured on 5 Nov 2026; two more receipts and the `why` and `flagged` lines follow.)
+
+## How it fits together
+
+```mermaid
+flowchart LR
+    A[text, markdown or PDF] --> B[ingest<br/>pages; scans refused]
+    B --> C[chunk<br/>passages with page + offset]
+    C --> D[retrieve<br/>BM25, offline]
+    D --> E{enough of the question<br/>in the best passage?}
+    E -->|no| X["not in the document"]
+    E -->|instruction phrase| Y[flagged: answer withheld,<br/>passage shown as a receipt]
+    E -->|yes| F[answer sentence<br/>+ receipts]
+```
+
 ## How the pipeline works, in plain words
 1. **Ingest** (`groundedqa/ingest.py`): bytes in, pages of text out. Text and markdown are one page; a PDF is read page by page with pypdf. Empty, binary, oversized and text-less PDFs are refused with the reason in the error.
 2. **Chunk** (`groundedqa/chunk.py`): each page is cut into passages of about 600 characters, only at paragraph breaks and before markdown headings, so a passage never holds two sections; one paragraph is never cut in the middle, however long. Each passage remembers its page and the exact character offset of its first visible character. Deterministic.
